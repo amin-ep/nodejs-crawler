@@ -10,13 +10,14 @@ const websiteSchema = new Schema(
     domain: {
       type: String,
     },
+    province: {
+      type: String,
+    },
     stars: {
       type: Number,
-      min: 1,
-      max: 5,
     },
     expirationDate: {
-      type: Date,
+      type: String,
     },
   },
   {
