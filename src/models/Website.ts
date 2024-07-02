@@ -1,28 +1,20 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
 
-const websiteSchema = new Schema(
-  {
-    name: {
-      type: String,
-    },
-    domain: {
-      type: String,
-    },
-    province: {
-      type: String,
-    },
-    stars: {
-      type: Number,
-    },
-    expirationDate: {
-      type: String,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+const websiteSchema = new Schema({
+  name: String,
+  domain: String,
+  city: String,
+  starRating: Number,
+  expirationDate: String,
+});
 
-export default mongoose.model("Website", websiteSchema);
+websiteSchema.pre(/^find/, function (next) {
+  const query = this as mongoose.Query<string, string>;
+
+  query.select('-__v');
+  next();
+});
+
+export default mongoose.model('Website', websiteSchema);

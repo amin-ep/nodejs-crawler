@@ -1,18 +1,19 @@
+import { Request, Response } from 'express';
 import axios, { AxiosResponse } from 'axios';
 import * as cheerio from 'cheerio';
-import IWebsite from './interfaces/IWebsite'
+import IWebsite from './interfaces/IWebsite';
 import Website from './models/Website';
 
 // Refactor me
-export default async function crawlWebsite() {
+export default async function crawlWebsite(req: Request, res: Response) {
   try {
-    for (let pageIndex: number = 2; pageIndex <= 4; pageIndex++) {
-      const url: string = `https://enamad.ir/DomainListForMIMT/Index/${pageIndex}`;
+    for (let i: number = 2; i <= 4; i++) {
+      const url: string = `https://enamad.ir/DomainListForMIMT/Index/${i}`;
       const response: AxiosResponse = await axios.get(url);
       const html = await response.data;
       const $ = cheerio.load(html);
-      for (let rowIndex = 1; rowIndex <= 30; rowIndex++) {
-        const rows = $(`div#Div_Content > div:nth-child(${rowIndex})`);
+      for (let r = 1; r <= 30; r++) {
+        const rows = $(`div#Div_Content > div:nth-child(${r})`);
         rows.each((i, el) => {
           (async () => {
             const name: string = $(el)
@@ -22,28 +23,50 @@ export default async function crawlWebsite() {
             const domain: string = $(el)
               .find('div:nth-child(2)')
               .first()
-              .text().trim();
-            const province: string = $(el).find('div:nth-child(5)').text().trim();
-            const stars: number = $(el)
-              .find('div:nth-child(6) img')
-              .length;
-            const expirationDate: string = $(el).find('div:nth-child(8)').text().trim();
+              .text()
+              .trim();
+            const city: string = $(el).find('div:nth-child(5)').text().trim();
+            const starRating: number = $(el).find(
+              'div:nth-child(6) img'
+            ).length;
+            const expirationDate: string = $(el)
+              .find('div:nth-child(8)')
+              .text()
+              .trim();
 
             const websiteData: IWebsite = {
-              name, domain, stars, expirationDate, province
-            }
+              name,
+              domain,
+              starRating,
+              expirationDate,
+              city,
+            };
 
-            const checkDataExists = await Website.find();
-            if (checkDataExists.length >= 90) {
-              console.log(`domain ${domain} is added!`)
-            } else {
+            const allData = await Website.find();
+            const checkDomainAdded = allData.findIndex(
+              el => el.domain == domain
+            );
+
+            // also we can do this:
+            // const checkDomain = await Website.findOne({ domain: domain });
+
+            if (checkDomainAdded < 0) {
               await Website.create(websiteData);
+            } else {
+              console.log(`domain ${domain} is added!`);
             }
           })();
         });
       }
     }
+    res.status(201).json({
+      status: 'success',
+      message: 'Data added successfully',
+    });
   } catch (err) {
-    console.error(err);
+    res.status(500).json({
+      status: 'error',
+      message: 'cannot add data. something went wrong!',
+    });
   }
 }

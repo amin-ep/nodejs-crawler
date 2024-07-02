@@ -1,7 +1,13 @@
 export default interface IWebsite {
-    name: string;
-    domain: string;
-    province: string;
-    stars: number;
-    expirationDate: string
+  name: string;
+  domain: string;
+  city: string;
+  starRating: number;
+  expirationDate: string;
 }
+
+export type CityStats = {
+  _id: string;
+  count: number;
+  data: IWebsite;
+};
