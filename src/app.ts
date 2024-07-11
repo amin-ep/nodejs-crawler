@@ -27,7 +27,7 @@ app.use(
 
 // CRAWLING ENAMAD AND ADDING TO DATABASE
 
-app.post('/crawl', crawl);
+app.get('/crawl', crawl);
 
 // GET ALL WEBSITES
 app.route('/websites').get(getAllWebsites).delete(deleteAllWebsites);
