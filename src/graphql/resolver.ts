@@ -1,5 +1,6 @@
 import Website from '../models/Website';
 import { CityStats } from '../interfaces/IWebsite';
+
 const resolver = {
   getWebsitesPerCity: async () => {
     try {

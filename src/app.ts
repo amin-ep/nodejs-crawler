@@ -1,10 +1,13 @@
 import express, { Express, Request, Response } from 'express';
-import { createCsv } from './utils/writeCsv';
+import { createCsv } from './utils/csvWriter';
 import { graphqlHTTP } from 'express-graphql';
 import schema from './graphql/schema';
 import resolver from './graphql/resolver';
 import Website from './models/Website';
-import crawlWebsite from './crawler';
+import crawl from './utils/crawler';
+import path from 'path';
+import fs from 'fs';
+import { DownloaderHelper } from 'node-downloader-helper';
 
 const app: Express = express();
 
@@ -19,13 +22,14 @@ app.use(
   })
 );
 
+
 // CRAWLING ENAMAD AND ADDING TO DATABASE
 
-app.post('/crawl', crawlWebsite);
+app.post('/crawl', crawl);
 
 // GET ALL WEBSITES
 app
-  .route('/website')
+  .route('/websites')
   .get(async (req: Request, res: Response) => {
     try {
       const websites = await Website.find();
@@ -63,17 +67,18 @@ app
   });
 
 // CREATING CSV FILE
-app.get('/v1/export-csv', async (req: Request, res: Response) => {
+app.get('/export-csv', async (req: Request, res: Response) => {
   try {
-    console.log();
     const filter = req.query.fields as string;
-    const csvFile = await createCsv(filter.split(','));
-    res.download(csvFile);
+    await createCsv(filter.split(','));
     res.status(200).json({
       status: 'downloaded',
     });
   } catch (err) {
-    console.log(err);
+    res.status(500).json({
+      status: "fail",
+      message: "download failed!"
+    })
   }
 });
 
