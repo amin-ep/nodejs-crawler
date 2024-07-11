@@ -5,9 +5,6 @@ import schema from './graphql/schema';
 import resolver from './graphql/resolver';
 import Website from './models/Website';
 import crawl from './utils/crawler';
-import path from 'path';
-import fs from 'fs';
-import { DownloaderHelper } from 'node-downloader-helper';
 
 const app: Express = express();
 
